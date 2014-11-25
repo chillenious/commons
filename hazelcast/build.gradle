@@ -1,0 +1,8 @@
+description = 'Commons Hazelcast'
+
+dependencies {
+
+    compile project(':core')
+
+    compile group: 'com.hazelcast', name: 'hazelcast-all', version: '3.3.3'
+}

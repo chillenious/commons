@@ -1,0 +1,10 @@
+description = 'Commons Metrics'
+
+dependencies {
+
+    compile project(':core')
+
+    compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.1.0'
+    compile group: 'io.dropwizard.metrics', name: 'metrics-graphite', version: '3.1.0'
+    compile group: 'io.dropwizard.metrics', name: 'metrics-servlets', version: '3.1.0'
+}

@@ -1,0 +1,11 @@
+description = 'Commons jOOQ'
+
+dependencies {
+
+    compile project(':db')
+
+    compile group: 'org.jooq', name: 'jooq', version: '3.5.0'
+    compile group: 'javax.persistence', name: 'persistence-api', version: '1.0'
+    compile group: 'org.springframework', name: 'spring-context', version: '3.2.8.RELEASE'
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '3.2.8.RELEASE'
+}

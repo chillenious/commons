@@ -1,0 +1,68 @@
+
+allprojects {
+    
+    apply plugin: 'maven'
+    apply plugin: 'idea'
+
+    group = 'com.chillenious.commons'
+    version = '1.0.0'
+}
+
+subprojects {
+
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    idea {
+        module {
+            downloadSources = true
+        }
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url "http://clojars.org/repo" }
+    }
+
+    buildscript {
+
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            jcenter()
+            maven { url "http://clojars.org/repo" }
+        }
+
+        dependencies {
+            classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
+            classpath 'net.saliman:gradle-properties-plugin:1.4.2'
+        }
+    }
+}
+
+// http://www.gradle.org/docs/current/userguide/gradle_wrapper.html
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
+// Tell IntelliJ IDEA that the VCS for this project is Git
+idea.project.ipr {
+    withXml { provider ->
+        provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git'
+        provider.node.component.find { it.@name == 'ProjectRootManager' }.@"assert-jdk-15" = 'true'
+        provider.node.component.find { it.@name == 'ProjectRootManager' }.@languageLevel = 'JDK_1_8'
+    }
+}

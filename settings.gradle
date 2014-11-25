@@ -1,0 +1,16 @@
+rootProject.name = 'commons'
+include ':core'
+include ':db'
+include ':jooq'
+include ':metrics'
+include ':hazelcast'
+include ':refresher'
+include ':elasticsearch'
+
+project(':core').projectDir = "$rootDir/core" as File
+project(':db').projectDir = "$rootDir/db" as File
+project(':jooq').projectDir = "$rootDir/jooq" as File
+project(':metrics').projectDir = "$rootDir/metrics" as File
+project(':hazelcast').projectDir = "$rootDir/hazelcast" as File
+project(':refresher').projectDir = "$rootDir/refresher" as File
+project(':elasticsearch').projectDir = "$rootDir/elasticsearch" as File

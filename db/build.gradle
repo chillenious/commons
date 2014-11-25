@@ -1,0 +1,8 @@
+description = 'Commons DB'
+
+dependencies {
+
+    compile project(':core')
+
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
+}
