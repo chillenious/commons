@@ -13,7 +13,27 @@ I'd like to thank [Bibliolabs](http://www.biblioboard.com) (my current employer)
 [OneSpot](https://www.onespot.com) (my previous employer) in particular
 for giving Guice a try - and never looking back afterwards :-) - and for letting me opensource these
 utilities. The refresher framework was entirely written for OneSpot and may have limited use outside
-of it's particular usecase, but you might find it useful or interesting to look at still.
+of it's particular usecase, but you might find it useful or interesting to look at still. And
+finally, [Tim Boudreau](https://github.com/timboudreau) for some of the suggestions that
+improved upon the first version way back when, and [Jonathan Locke](https://codeact.wordpress.com/about-jonathan-locke),
+the original author of [Wicket](https://wicket.apache.org), for some neat utility classes I stole
+from him/ Wicket.
+
+## Including
+
+Include in your Gradle project like:
+
+```Groovy
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile group: 'com.chillenious.commons', name: 'jooq', version: '1.0.0'
+}
+```
+
+Of course, you can use Maven in the same fashion.
 
 ## Bootstrapping
 
