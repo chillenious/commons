@@ -104,3 +104,4 @@ local.properties
 .texlipse
 
 data
+elasticsearch/data
