@@ -7,9 +7,18 @@ import org.jooq.SelectQuery;
 /**
  * Offset and number of rows to load with queries.
  */
-public final class Limit {
+public class Limit {
 
-    private static final int MAX_LIMIT = 1000;
+    /**
+     * Return all rows from 0 (use with care!)
+     */
+    public static Limit EVERYTHING = new Limit(0, Integer.MAX_VALUE) {
+        @Override
+        protected void checkRange(int offset, int numberOfRows) {
+        }
+    };
+
+    public static int MAX_LIMIT = 1000; // default max limit
 
     private static final String
             MSG_RANGE = String.format("offset must be an integer between 1 and %,d", MAX_LIMIT),
@@ -38,7 +47,7 @@ public final class Limit {
 
     /**
      * Builder for limit instances. Get an instance by calling
-     * {@link com.chillenious.common.db.jooq.svc.Limit.LimitBuilder#get(int)}
+     * {@link LimitBuilder#get(int)}
      */
     public static class LimitBuilder {
 
@@ -60,21 +69,37 @@ public final class Limit {
 
     private final int numberOfRows;
 
-    private Limit(int offset, int numberOfRows) {
-        Preconditions.checkState(offset >= 0, MSG_MUST_BE_POSITIVE_INT);
-        Preconditions.checkState(numberOfRows > 0 && numberOfRows <= MAX_LIMIT, MSG_RANGE);
+    protected Limit(int offset, int numberOfRows) {
+        checkRange(offset, numberOfRows);
         this.offset = offset;
         this.numberOfRows = numberOfRows;
     }
 
+    /**
+     * Checks range of the limit when constructing. Throws IllegalStateException when range is invalid.
+     */
+    protected void checkRange(int offset, int numberOfRows) {
+        Preconditions.checkState(offset >= 0, MSG_MUST_BE_POSITIVE_INT);
+        Preconditions.checkState(numberOfRows > 0 && numberOfRows <= MAX_LIMIT, MSG_RANGE);
+    }
+
+    /**
+     * Gets offset (start) query should start fetching results.
+     */
     public int getOffset() {
         return offset;
     }
 
+    /**
+     * Gets number of rows that should be fetched starting from the offset.
+     */
     public int getNumberOfRows() {
         return numberOfRows;
     }
 
+    /**
+     * Add the limit clause to the provided query.
+     */
     public void apply(SelectQuery query) {
         query.addLimit(offset, numberOfRows);
     }
