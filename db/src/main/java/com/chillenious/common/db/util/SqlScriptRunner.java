@@ -23,7 +23,10 @@ import java.util.regex.Pattern;
 
 /**
  * Runs SQL scripts.
+ *
+ * @deprecated use {@link com.chillenious.common.db.util.ScriptRunner} instead
  */
+@Deprecated
 @Singleton
 public final class SqlScriptRunner {
 
