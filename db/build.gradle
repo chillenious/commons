@@ -5,4 +5,5 @@ dependencies {
     compile project(':core')
 
     compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
+    compile group: 'org.flywaydb', name: 'flyway-core', version: '3.1'
 }
