@@ -1,0 +1,3 @@
+Couple of notes...
+
+* Deploy to bintray: `gradle clean build bintrayUpload`

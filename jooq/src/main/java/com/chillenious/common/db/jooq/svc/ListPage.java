@@ -14,10 +14,10 @@ import java.util.stream.Collector;
 /**
  * A page of results in a list.
  */
-public final class ListPage<T> implements Serializable, Iterable<T>, Wrapped<ImmutableList<T>> {
+public class ListPage<T> implements Serializable, Iterable<T>, Wrapped<ImmutableList<T>> {
 
     /**
-     * Get list page instance using the provided offset, limit and objects (list).
+     * Get list page instance using the provided offset, limit and objects (list.
      */
     public static <E> ListPage<E> of(int offset, int requestedLimit, E[] list) {
         return new ListPage<>(offset, requestedLimit, ImmutableList.copyOf(list));
@@ -30,16 +30,43 @@ public final class ListPage<T> implements Serializable, Iterable<T>, Wrapped<Imm
         return new ListPage<>(offset, requestedLimit, ImmutableList.copyOf(list));
     }
 
+    /**
+     * Get list page instance using the provided offset, limit and objects (list).
+     * Parameter hasMore denotes whether there are more rows; this would only be set when
+     * the server specifically handle this.
+     */
+    public static <E> ListPage<E> of(int offset, int requestedLimit, E[] list, Boolean hasMore) {
+        return new ListPage<>(offset, requestedLimit, ImmutableList.copyOf(list), hasMore);
+    }
+
+    /**
+     * Get list page instance using the provided offset, limit and objects (list).
+     * Parameter hasMore denotes whether there are more rows; this would only be set when
+     * the server specifically handle this.
+     */
+    public static <E> ListPage<E> of(int offset, int requestedLimit, List<E> list, Boolean hasMore) {
+        return new ListPage<>(offset, requestedLimit, ImmutableList.copyOf(list), hasMore);
+    }
+
     private final int offset;
 
     private final int requestedLimit;
 
     private final ImmutableList<T> objects;
 
-    private ListPage(int offset, int requestedLimit, ImmutableList<T> objects) {
+    // optional field (will be null if not set) that tells whether there are more rows
+    // beyond this page at the time the result is constructed
+    private final Boolean hasMore;
+
+    protected ListPage(int offset, int requestedLimit, ImmutableList<T> objects) {
+        this(offset, requestedLimit, objects, null);
+    }
+
+    protected ListPage(int offset, int requestedLimit, ImmutableList<T> objects, Boolean hasMore) {
         this.offset = offset;
         this.requestedLimit = requestedLimit;
         this.objects = Objects.requireNonNull(objects);
+        this.hasMore = hasMore;
     }
 
     public int getOffset() {
@@ -66,6 +93,10 @@ public final class ListPage<T> implements Serializable, Iterable<T>, Wrapped<Imm
     @Override
     public ImmutableList<T> getWrapped() {
         return objects;
+    }
+
+    public Boolean getHasMore() {
+        return hasMore;
     }
 
     @Override
@@ -95,6 +126,19 @@ public final class ListPage<T> implements Serializable, Iterable<T>, Wrapped<Imm
      *                       objects in the page list are less than the requested limit)
      */
     public static <T> Collector<T, List<T>, ListPage<T>> toListPage(int offset, int requestedLimit) {
+        return toListPage(offset, requestedLimit, null);
+    }
+
+    /**
+     * Collector that turns stream into a list page instance using the passed in offset and number of rows.
+     *
+     * @param offset         results were fetched starting from...
+     * @param requestedLimit requested maximum number of rows to be read after the offset (it is
+     *                       possible that there were not that many rows from the offset, in which case the
+     *                       objects in the page list are less than the requested limit)
+     */
+    public static <T> Collector<T, List<T>, ListPage<T>> toListPage(
+            int offset, int requestedLimit, Boolean hasMore) {
         return Collector.of(
                 ArrayList::new,
                 List::add,

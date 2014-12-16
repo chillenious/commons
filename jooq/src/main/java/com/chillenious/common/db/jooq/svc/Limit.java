@@ -5,7 +5,9 @@ import com.google.common.base.Preconditions;
 import org.jooq.SelectQuery;
 
 /**
- * Offset and number of rows to load with queries.
+ * Offset and number of rows to load with queries. Typically, you'd use this class in tandem with
+ * {@link com.chillenious.common.db.jooq.svc.ListPage}, which would hold the results of the query
+ * that uses this.
  */
 public class Limit {
 
@@ -53,6 +55,8 @@ public class Limit {
 
         private final int limit;
 
+        private boolean testForMore = false;
+
         private LimitBuilder(int limit) {
             this.limit = limit;
         }
@@ -61,7 +65,16 @@ public class Limit {
          * Get limit instance based on the previously provided limit and given offset.
          */
         public Limit startingAt(int offset) {
-            return new Limit(offset, limit);
+            return new Limit(offset, limit, testForMore);
+        }
+
+        /**
+         * Hint clients of the instance that they should test whether there are more rows available
+         * beyond the limit.
+         */
+        public LimitBuilder withTestForMore() {
+            this.testForMore = true;
+            return this;
         }
     }
 
@@ -69,10 +82,17 @@ public class Limit {
 
     private final int numberOfRows;
 
+    private final boolean testForMore;
+
     protected Limit(int offset, int numberOfRows) {
+        this(offset, numberOfRows, false);
+    }
+
+    protected Limit(int offset, int numberOfRows, boolean testForMore) {
         checkRange(offset, numberOfRows);
         this.offset = offset;
         this.numberOfRows = numberOfRows;
+        this.testForMore = testForMore;
     }
 
     /**
@@ -95,6 +115,13 @@ public class Limit {
      */
     public int getNumberOfRows() {
         return numberOfRows;
+    }
+
+    /**
+     * whether to test whether there are more records beyond the provided offset and limit.
+     */
+    public boolean isTestForMore() {
+        return numberOfRows < Integer.MAX_VALUE && testForMore;
     }
 
     /**
