@@ -4,12 +4,16 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.jooq.SelectQuery;
 
+import java.io.Serializable;
+
 /**
  * Offset and number of rows to load with queries. Typically, you'd use this class in tandem with
  * {@link com.chillenious.common.db.jooq.svc.ListPage}, which would hold the results of the query
  * that uses this.
  */
-public class Limit {
+public class Limit implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Return all rows from 0 (use with care!)
@@ -69,6 +73,15 @@ public class Limit {
         }
 
         /**
+         * Whether to hint clients of the instance that they should test whether there are more
+         * rows available beyond the limit.
+         */
+        public LimitBuilder withTestForMore(boolean testForMore) {
+            this.testForMore = testForMore;
+            return this;
+        }
+
+        /**
          * Hint clients of the instance that they should test whether there are more rows available
          * beyond the limit.
          */
@@ -120,7 +133,7 @@ public class Limit {
     /**
      * whether to test whether there are more records beyond the provided offset and limit.
      */
-    public boolean isTestForMore() {
+    public boolean getTestForMore() {
         return numberOfRows < Integer.MAX_VALUE && testForMore;
     }
 
@@ -128,7 +141,7 @@ public class Limit {
      * Add the limit clause to the provided query.
      */
     public void apply(SelectQuery query) {
-        query.addLimit(offset, numberOfRows);
+        query.addLimit(offset, numberOfRows + (testForMore ? 1 : 0));
     }
 
     @Override
@@ -136,6 +149,7 @@ public class Limit {
         return MoreObjects.toStringHelper(this)
                 .add("offset", offset)
                 .add("numberOfRows", numberOfRows)
+                .add("testForMore", testForMore)
                 .toString();
     }
 }
