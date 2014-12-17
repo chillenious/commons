@@ -94,6 +94,10 @@ public class ListPage<T> implements Serializable, Iterable<T>, Wrapped<List<T>> 
         return objects;
     }
 
+    public Limit getLimit() {
+        return limit;
+    }
+
     /**
      * Whether there are more records beyond the results in this list page. This is
      * null if the {@link com.chillenious.common.db.jooq.svc.Limit limit} wasn't
