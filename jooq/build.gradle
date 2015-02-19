@@ -4,7 +4,7 @@ dependencies {
 
     compile project(':db')
 
-    compile group: 'org.jooq', name: 'jooq', version: '3.5.0'
+    compile group: 'org.jooq', name: 'jooq', version: '3.5.2'
     compile group: 'javax.persistence', name: 'persistence-api', version: '1.0'
     compile group: 'org.springframework', name: 'spring-context', version: '4.1.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-jdbc', version: '4.1.2.RELEASE'

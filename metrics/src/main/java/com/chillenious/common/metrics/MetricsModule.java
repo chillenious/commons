@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Sets up Metrics. We're keeping it simple for now and assume projects
  * use a single configuration.
  * <p>
- * Use setting <code>metrics.registry.name</code> to configure a base name to create
+ * Use setting <code>metrics.graphite.instanceName</code> to configure a base name to create
  * a registry for, which is then used for binding and possibly a few other things.
  */
 public class MetricsModule extends AbstractModule {
@@ -58,7 +58,7 @@ public class MetricsModule extends AbstractModule {
     protected void configure() {
 
         if (settings.getBoolean("metrics.graphite.enabled", false)) {
-            final String registryName = settings.getString("metrics.registry.name", "metrics");
+            final String registryName = settings.getString("metrics.graphite.instanceName", "metrics");
             final MetricRegistry registry = SharedMetricRegistries.getOrCreate(registryName);
             bind(MetricRegistry.class).toInstance(registry);
             bind(Metrics.class).asEagerSingleton();

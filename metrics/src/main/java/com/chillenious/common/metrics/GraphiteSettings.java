@@ -18,6 +18,10 @@ public final class GraphiteSettings implements Serializable {
 
     private String apiKey;
 
+    private boolean enabled;
+
+    private String instanceName;
+
     private Duration reportingInterval = Duration.seconds(30);
 
     public String getApiKey() {
@@ -50,6 +54,22 @@ public final class GraphiteSettings implements Serializable {
 
     public void setReportingInterval(Duration reportingInterval) {
         this.reportingInterval = reportingInterval;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     @Override
