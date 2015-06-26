@@ -5,7 +5,6 @@ import com.chillenious.common.ShutdownHooks;
 import com.chillenious.common.WithShutdown;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +42,8 @@ public class DataSources implements WithShutdown {
         this.settings = settings;
         shutdownHooks.add(this);
         // initialize with any single data source setup
+
+
         dataSourceConfigs = settings.map("dataSource.", HikariConfigExtended.class);
 
         // add any additionally configured (multi-)datasources
@@ -56,10 +57,11 @@ public class DataSources implements WithShutdown {
         }
 
         // create actual data sources
-        for (Entry<String, HikariConfigExtended> e : dataSourceConfigs.entrySet()) {
+        for (Entry<String, HikariConfigExtended> entry : dataSourceConfigs.entrySet()) {
 
-            HikariConfig config = e.getValue();
-            String dataSourceName = e.getKey();
+            HikariConfigExtended config = entry.getValue();
+            config.initExtraDataSourceProperties();
+            String dataSourceName = entry.getKey();
             // try loading the data source class
             try {
                 Class.forName(config.getDataSourceClassName());

@@ -1,5 +1,7 @@
 package com.chillenious.common;
 
+import com.chillenious.common.util.AnySetter;
+import com.chillenious.common.util.PropertyNotFoundException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
@@ -21,6 +23,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +37,7 @@ import java.util.regex.Pattern;
 /**
  * Beefed up properties that in addition to being a key/ value store, can deal with a few type conversions,
  * loading of files from file system and class path, do overrides and substitutions and map to special objects.
- * <p/>
+ * <p>
  * It is recommended that you use {@link com.chillenious.common.Settings.SettingsBuilder} to create an instance
  * instead of using this class directly. Generally, you should consider settings immutable after the
  * {@link com.chillenious.common.Bootstrap} is created with it, as there is no reliable way to know whether
@@ -66,7 +69,7 @@ public final class Settings implements Serializable {
      * Loads property file from class path. Replaces all variables in values with
      * pattern ${var} with values of previously loaded properties or system properties
      * (latter takes precedence).
-     * <p/>
+     * <p>
      * If properties were already loaded, any properties with the same name will
      * be overridden. A message will be logged when that happens.
      *
@@ -92,7 +95,7 @@ public final class Settings implements Serializable {
      * Loads properties directly. Replaces all variables in values with
      * pattern ${var} with values of previously loaded properties or system properties
      * (latter takes precedence).
-     * <p/>
+     * <p>
      * If properties were already loaded, any properties with the same name will
      * be overridden. A message will be logged when that happens.
      *
@@ -109,7 +112,7 @@ public final class Settings implements Serializable {
      * Loads property file from file system. Replaces all variables in values with
      * pattern ${var} with values of previously loaded properties or system properties
      * (latter takes precedence).
-     * <p/>
+     * <p>
      * If properties were already loaded, any properties with the same name will
      * be overridden. A message will be logged when that happens.
      *
@@ -689,7 +692,7 @@ public final class Settings implements Serializable {
 
     /**
      * Gets a setting value or null when not set.
-     * <p/>
+     * <p>
      * NOTE: Where possible clients should depend on Guice's @Named annotation,
      * but in case clients need direct access to a setting, this can be used.
      *
@@ -1064,20 +1067,26 @@ public final class Settings implements Serializable {
                 } else {
                     Field f = getField(type, field);
                     if (f == null) {
-                        throw new IllegalStateException(
-                                "neither a setter nor a field found that " +
-                                        "conforms to property name "
-                                        + field + ", instance=" + instance
-                        );
-                    }
-                    f.setAccessible(true);
-                    Class<?> fieldType = convertPrimitiveIfNeeded(f.getType());
-                    if (String.class.isAssignableFrom(fieldType)) {
-                        f.set(instance, sValue);
+                        Method fallback = getAnySetter(type);
+                        if (fallback == null) {
+                            throw new PropertyNotFoundException(
+                                    "neither a setter nor a field found that " +
+                                            "conforms to property name "
+                                            + field + ", instance=" + instance
+                            );
+                        } else {
+                            fallback.invoke(instance, field, sValue);
+                        }
                     } else {
-                        Method valueOf = valueOfMethod(f.getType());
-                        Object convertedValue = valueOf.invoke(null, sValue);
-                        f.set(instance, convertedValue);
+                        f.setAccessible(true);
+                        Class<?> fieldType = convertPrimitiveIfNeeded(f.getType());
+                        if (String.class.isAssignableFrom(fieldType)) {
+                            f.set(instance, sValue);
+                        } else {
+                            Method valueOf = valueOfMethod(f.getType());
+                            Object convertedValue = valueOf.invoke(null, sValue);
+                            f.set(instance, convertedValue);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -1225,6 +1234,23 @@ public final class Settings implements Serializable {
             return getSetter(type.getSuperclass(), name);
         }
 
+        // tries to find first method annotated with AnySetter, which should have
+        // two string arguments (key/ value)
+        private Method getAnySetter(Class<?> type) {
+            // TODO [Eelco] could be cached
+            if (Object.class.equals(type)) {
+                return null;
+            }
+            for (Method m : type.getDeclaredMethods()) {
+                if (Arrays.stream(m.getDeclaredAnnotations())
+                        .anyMatch(a -> a instanceof AnySetter)) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+            return getAnySetter(type.getSuperclass());
+        }
+
         /**
          * Get the static valueOf(String ) method.
          *
@@ -1265,7 +1291,7 @@ public final class Settings implements Serializable {
          * Loads property file from class path. Replaces all variables in values with
          * pattern ${var} with values of previously loaded properties or system properties
          * (latter takes precedence).
-         * <p/>
+         * <p>
          * If properties were already loaded, any properties with the same name will
          * be overridden. A message will be logged when that happens.
          *
@@ -1280,7 +1306,7 @@ public final class Settings implements Serializable {
          * Loads property file from file system. Replaces all variables in values with
          * pattern ${var} with values of previously loaded properties or system properties
          * (latter takes precedence).
-         * <p/>
+         * <p>
          * If properties were already loaded, any properties with the same name will
          * be overridden. A message will be logged when that happens.
          *
@@ -1295,7 +1321,7 @@ public final class Settings implements Serializable {
          * Loads properties directly. Replaces all variables in values with
          * pattern ${var} with values of previously loaded properties or system properties
          * (latter takes precedence).
-         * <p/>
+         * <p>
          * If properties were already loaded, any properties with the same name will
          * be overridden. A message will be logged when that happens.
          *
@@ -1310,7 +1336,7 @@ public final class Settings implements Serializable {
          * Loads a property directly. Replaces all variables in values with
          * pattern ${var} with values of previously loaded properties or system properties
          * (latter takes precedence).
-         * <p/>
+         * <p>
          * If properties were already loaded, any properties with the same name will
          * be overridden. A message will be logged when that happens.
          *
@@ -1328,7 +1354,7 @@ public final class Settings implements Serializable {
          * Try to load property file from class path. Replaces all variables in values with
          * pattern ${var} with values of previously loaded properties or system properties
          * (latter takes precedence). Will be ignored if loading fails.
-         * <p/>
+         * <p>
          * If properties were already loaded, any properties with the same name will
          * be overridden. A message will be logged when that happens.
          *

@@ -1,13 +1,16 @@
 package com.chillenious.common;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.chillenious.common.util.AnySetter;
 import com.chillenious.common.util.Duration;
 import com.chillenious.common.util.DurationSetting;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class SettingsTest {
@@ -281,5 +284,52 @@ public class SettingsTest {
         Bootstrap bootstrap = new Bootstrap(settings);
         WhatsYourFoo instance = bootstrap.getInjector().getInstance(WhatsYourFoo.class);
         Assert.assertEquals("bar", instance.foo);
+    }
+
+    static class Bean {
+
+        String prop;
+
+        public String getProp() {
+            return prop;
+        }
+
+        public void setProp(String prop) {
+            this.prop = prop;
+        }
+    }
+
+    static class Bean2 {
+
+        Map<String, String> m = new HashMap<>();
+
+        @AnySetter
+        public void setAny(String prop, String value) {
+            m.put(prop, value);
+        }
+    }
+
+    @Test
+    public void testMapping() {
+
+        Settings settings = Settings.builder().add("obj.prop", "foo").build();
+        Settings.MappedSettings<Bean> mapped = settings.map("obj", Bean.class);
+        Assert.assertNotNull(mapped);
+        Bean bean = mapped.get("obj");
+        Assert.assertNotNull(bean);
+        Assert.assertEquals("foo", bean.getProp());
+
+        settings = Settings.builder().add("obj.bar", "foo").build();
+        try {
+            settings.map("obj", Bean.class);
+            Assert.fail("exception should be thrown because bar is not a property");
+        } catch (Exception e) {
+            // expected
+        }
+
+        Settings.MappedSettings<Bean2> mapped2 = settings.map("obj", Bean2.class);
+        Bean2 bean2 = mapped2.get("obj");
+        Assert.assertNotNull(bean2);
+        Assert.assertEquals("foo", bean2.m.get("bar"));
     }
 }
