@@ -60,7 +60,6 @@ public class DataSources implements WithShutdown {
         for (Entry<String, HikariConfigExtended> entry : dataSourceConfigs.entrySet()) {
 
             HikariConfigExtended config = entry.getValue();
-            config.initExtraDataSourceProperties();
             String dataSourceName = entry.getKey();
             // try loading the data source class
             try {

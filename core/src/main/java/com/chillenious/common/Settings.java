@@ -1244,8 +1244,16 @@ public final class Settings implements Serializable {
             for (Method m : type.getDeclaredMethods()) {
                 if (Arrays.stream(m.getDeclaredAnnotations())
                         .anyMatch(a -> a instanceof AnySetter)) {
-                    m.setAccessible(true);
-                    return m;
+                    if (m.getParameterCount() == 2 &&
+                            m.getParameterTypes()[0].equals(String.class) &&
+                            m.getParameterTypes()[1].equals(String.class)) {
+                        m.setAccessible(true);
+                        return m;
+                    } else {
+                        throw new IllegalStateException(String.format(
+                                "method %s is annotated with AnySetter, but does not have the " +
+                                        "right signature (two args of type string)", m));
+                    }
                 }
             }
             return getAnySetter(type.getSuperclass());
