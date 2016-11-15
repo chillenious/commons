@@ -27,8 +27,8 @@ public class Limit implements Serializable {
     public static int MAX_LIMIT = 1000; // default max limit
 
     private static final String
-            MSG_RANGE = String.format("offset must be an integer between 1 and %,d", MAX_LIMIT),
-            MSG_MUST_BE_POSITIVE_INT = "offset must be a positive integer";
+            MSG_LIMIT_RANGE = String.format("nbrOfRows must be an integer between 0 and %,d", MAX_LIMIT),
+            MSG_OFFSET_MUST_BE_POSITIVE_INT = "offset must be a positive integer";
 
     /**
      * Get limit builder instance initialized with the provided limit (max rows to read).
@@ -112,8 +112,8 @@ public class Limit implements Serializable {
      * Checks range of the limit when constructing. Throws IllegalStateException when range is invalid.
      */
     protected void checkRange(int offset, int numberOfRows) {
-        Preconditions.checkState(offset >= 0, MSG_MUST_BE_POSITIVE_INT);
-        Preconditions.checkState(numberOfRows > 0 && numberOfRows <= MAX_LIMIT, MSG_RANGE);
+        Preconditions.checkState(offset >= 0, MSG_OFFSET_MUST_BE_POSITIVE_INT);
+        Preconditions.checkState(numberOfRows >= 0 && numberOfRows <= MAX_LIMIT, MSG_LIMIT_RANGE);
     }
 
     /**
